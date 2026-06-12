@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>pickleDB · Lightning-Fast Key-Value Store for Python</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #f8fdf9;
+      --bg-secondary: #f0f9f2;
+      --bg-card: #ffffff;
+      --text-primary: #1a1f1b;
+      --text-secondary: #4a5c4d;
+      --text-muted: #7a8a7d;
+      --accent-pickle: #5fc45f;
+      --accent-lime: #8fd460;
+      --accent-forest: #3a9943;
+      --accent-sage: #6b9b6e;
+      --accent-mint: #4ecdc4;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --border: #dfe8e0;
+      --border-dark: #c5d4c7;
+      --shadow: rgba(26, 31, 27, 0.08);
+      --shadow-strong: rgba(26, 31, 27, 0.15);
+      --mono: 'Fira Code', 'Courier New', monospace;
+      --sans: 'Outfit', system-ui, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* Animated background pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(95, 196, 95, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(143, 212, 96, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(78, 205, 196, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+      animation: patternShift 30s ease-in-out infinite alternate;
+    }
+
+    @keyframes patternShift {
+      0% { transform: scale(1) rotate(0deg); }
+      100% { transform: scale(1.1) rotate(5deg); }
+    }
+
+    .page {
+      position: relative;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px 100px;
+      z-index: 1;
+    }
+
+    /* Hero Section */
+    header {
+      padding: 60px 0 80px;
+      text-align: center;
+      position: relative;
+    }
+
+    .badges {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      animation: fadeIn 0.8s ease 0.2s both;
+    }
+
+    .badges img {
+      height: 28px;
+      transition: transform 0.2s ease;
+    }
+
+    .badges img:hover {
+      transform: scale(1.05);
+    }
+
+    h1 {
+      font-size: clamp(3.5rem, 10vw, 6.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 24px;
+      position: relative;
+      display: inline-block;
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1::before {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 10%;
+      right: 10%;
+      height: 12px;
+      background: linear-gradient(90deg, 
+        var(--accent-forest), 
+        var(--accent-pickle), 
+        var(--accent-lime));
+      border-radius: 6px;
+      z-index: -1;
+      animation: expandBar 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+    }
+
+    @keyframes expandBar {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    .tagline {
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      font-weight: 500;
+      animation: fadeIn 0.8s ease 0.6s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .tagline strong {
+      color: var(--accent-forest);
+      font-weight: 700;
+    }
+
+    .license-note {
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+      animation: fadeIn 0.8s ease 0.8s both;
+    }
+
+    /* Feature Badges */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 48px 0 80px;
+      animation: fadeIn 0.8s ease 1s both;
+    }
+
+    .feature-badge {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-badge::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-forest), var(--accent-pickle));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .feature-badge:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px var(--shadow-strong);
+      border-color: var(--accent-pickle);
+    }
+
+    .feature-badge:hover::before {
+      transform: scaleX(1);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .feature-label {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+    }
+
+    /* Section Styles */
+    .section {
+      margin-bottom: 80px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    h2 {
+      font-size: clamp(2.25rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 32px;
+      color: var(--text-primary);
+      position: relative;
+      padding-left: 24px;
+    }
+
+    h2::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      background: linear-gradient(180deg, var(--accent-pickle), var(--accent-sage));
+      border-radius: 3px;
+    }
+
+    h3 {
+      font-size: clamp(1.5rem, 3vw, 1.875rem);
+      font-weight: 600;
+      margin: 48px 0 20px;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 24px 0 12px;
+      color: var(--accent-forest);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.875rem;
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      font-size: 1.0625rem;
+    }
+
+    /* Code Blocks */
+    pre {
+      margin: 24px 0;
+      padding: 28px;
+      background: linear-gradient(135deg, #2d2a2e 0%, #1f1d21 100%);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      overflow-x: auto;
+      position: relative;
+      box-shadow: 0 8px 24px var(--shadow-strong);
+      transition: all 0.3s ease;
+    }
+
+    pre:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px var(--shadow-strong);
+    }
+
+    pre::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-forest), var(--accent-pickle), var(--accent-lime));
+    }
+
+    pre code {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      line-height: 1.8;
+      color: #e8e6e3;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      background: var(--bg-secondary);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: var(--accent-forest);
+      border: 1px solid var(--border);
+      font-weight: 500;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      border: none;
+    }
+
+    /* Syntax highlighting for code */
+    .comment { color: #75715e; }
+    .keyword { color: #ff6b9d; font-weight: 600; }
+    .string { color: #a9dc76; }
+    .function { color: #78dce8; }
+    .number { color: #ab9df2; }
+
+    /* Lists */
+    ul, ol {
+      margin: 20px 0 20px 32px;
+      color: var(--text-secondary);
+    }
+
+    li {
+      margin-bottom: 12px;
+      padding-left: 8px;
+      line-height: 1.8;
+    }
+
+    li::marker {
+      color: var(--accent-pickle);
+      font-weight: 700;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      margin: 40px 0;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 16px var(--shadow);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-forest), var(--accent-pickle), var(--accent-lime));
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px var(--shadow-strong);
+    }
+
+    /* Install Banner */
+    .install-banner {
+      background: linear-gradient(135deg, var(--accent-pickle), var(--accent-lime));
+      color: white;
+      border-radius: 20px;
+      padding: 48px;
+      margin: 56px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(95, 196, 95, 0.3);
+    }
+
+    .install-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .install-banner h3 {
+      margin: 0 0 24px;
+      font-size: 2rem;
+      color: white;
+      position: relative;
+      z-index: 1;
+    }
+
+    .install-banner pre {
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      display: inline-block;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(10px);
+    }
+
+    .install-banner pre code {
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 32px 0;
+      background: var(--bg-card);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px var(--shadow);
+      border: 2px solid var(--border);
+    }
+
+    thead {
+      background: linear-gradient(135deg, var(--accent-pickle), var(--accent-lime));
+      color: white;
+    }
+
+    th {
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.875rem;
+    }
+
+    td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr {
+      transition: background 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background: var(--bg-secondary);
+    }
+
+    td code {
+      font-size: 0.875rem;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      background: var(--bg-secondary);
+      border-left: 6px solid var(--accent-mint);
+      border-radius: 0 12px 12px 0;
+      padding: 24px 28px;
+      margin: 32px 0;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .callout-warning {
+      border-left-color: var(--accent-warning);
+      background: #fef3c7;
+    }
+
+    .callout-danger {
+      border-left-color: var(--accent-danger);
+      background: #fee2e2;
+    }
+
+    .callout-success {
+      border-left-color: var(--accent-pickle);
+      background: #f0fdf4;
+    }
+
+    .callout p {
+      margin: 0;
+      color: var(--text-primary);
+    }
+
+    .callout p + p {
+      margin-top: 12px;
+    }
+
+    .callout strong {
+      color: var(--accent-mint);
+      font-weight: 700;
+    }
+
+    .callout-warning strong {
+      color: #d97706;
+    }
+
+    .callout-danger strong {
+      color: #dc2626;
+    }
+
+    .callout-success strong {
+      color: var(--accent-forest);
+    }
+
+    /* Performance Table Highlight */
+    .perf-table {
+      border: 3px solid var(--accent-pickle);
+    }
+
+    .perf-table thead {
+      background: linear-gradient(135deg, var(--accent-pickle), var(--accent-lime));
+    }
+
+    /* Quote */
+    .quote-block {
+      font-size: 1.5rem;
+      font-style: italic;
+      color: var(--text-muted);
+      text-align: center;
+      margin: 64px 0;
+      padding: 40px;
+      position: relative;
+    }
+
+    .quote-block::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 6rem;
+      color: var(--accent-lime);
+      opacity: 0.3;
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+
+    /* Links */
+    a {
+      color: var(--accent-forest);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent-pickle);
+      transition: width 0.2s ease;
+    }
+
+    a:hover::after {
+      width: 100%;
+    }
+
+    /* Context Manager Showcase */
+    .context-showcase {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 32px;
+      margin: 40px 0;
+    }
+
+    .context-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 16px var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    .context-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px var(--shadow-strong);
+    }
+
+    .context-card h4 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.25rem;
+      color: var(--text-primary);
+      text-transform: none;
+      letter-spacing: -0.01em;
+    }
+
+    /* API Reference */
+    .api-section {
+      margin: 32px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .api-class {
+      background: var(--bg-card);
+      border-radius: 18px;
+      border: 2px solid var(--border);
+      padding: 28px 30px;
+      box-shadow: 0 4px 16px var(--shadow);
+    }
+
+    .api-class-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .api-class-name {
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--accent-forest);
+    }
+
+    .api-class-note {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .api-method {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .api-signature {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .api-signature code {
+      background: rgba(255,255,255,0.8);
+      border-radius: 8px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    .api-tags {
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .api-tag {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.06);
+      background: rgba(255,255,255,0.7);
+      color: var(--text-muted);
+    }
+
+    .api-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .api-usage {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin: 6px 0 0 0;
+      padding-left: 20px;
+    }
+
+    .api-usage li {
+      margin-bottom: 4px;
+    }
+
+    /* When Not To Use Section */
+    .warning-list {
+      background: #fefce8;
+      border: 2px solid var(--accent-lime);
+      border-radius: 16px;
+      padding: 32px;
+      margin: 32px 0;
+    }
+
+    .warning-list h3 {
+      margin-top: 0;
+      color: #84a617;
+    }
+
+    .warning-list ul {
+      margin-bottom: 0;
+    }
+
+    .warning-list li {
+      color: #4d5a0f;
+    }
+
+    /* Comparison Table */
+    .comparison-table {
+      background: var(--bg-card);
+      border: 3px solid var(--accent-warning);
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 40px 0;
+      box-shadow: 0 8px 24px var(--shadow-strong);
+    }
+
+    .comparison-table thead {
+      background: linear-gradient(135deg, var(--accent-warning), var(--accent-lime));
+    }
+
+    .comparison-table tbody tr:hover {
+      background: #fef3c7;
+    }
+
+    .comparison-table td:first-child {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Footer */
+    .footer-note {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+      margin-top: 80px;
+      padding-top: 40px;
+      border-top: 2px solid var(--border);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .page {
+        padding: 0 16px 80px;
+      }
+
+      header {
+        padding: 40px 0 60px;
+      }
+
+      h2 {
+        padding-left: 16px;
+      }
+
+      h2::before {
+        width: 4px;
+      }
+
+      .context-showcase {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .install-banner {
+        padding: 32px 24px;
+      }
+
+      .quote-block::before {
+        font-size: 4rem;
+      }
+
+      .api-class {
+        padding: 22px 20px;
+      }
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Selection */
+    ::selection {
+      background: var(--accent-pickle);
+      color: white;
+    }
+
+    /* Fade-in utility */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Intersection Observer for scroll animations
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      document.querySelectorAll('.section, .fade-in').forEach(el => observer.observe(el));
+    });
+  </script>
+</head>
+<body>
+
+  <div class="page">
+    <header>
+      <div class="badges">
+        <a href="https://pypi.org/project/pickledb/">
+          <img src="https://static.pepy.tech/badge/pickledb" alt="PyPI Downloads">
+        </a>
+        <a href="https://github.com/patx/pickledb">
+          <img src="https://img.shields.io/github/stars/patx/pickledb?style=flat&logo=github" alt="GitHub Stars">
+        </a>
+      </div>
+
+      <h1>pickleDB</h1>
+      <p class="tagline">
+        JSON-backed key-value store with <strong>simple APIs</strong>, <strong>fast in-memory operations</strong>, and a <strong>unified sync/async interface</strong>
+      </p>
+      <p class="license-note">BSD 3-Clause License · © <a href="https://harrisonerd.com">Harrison Erd</a></p>
+    </header>
+
+    <section class="section">
+      <div class="install-banner">
+        <h3>Get Started in Seconds</h3>
+        <pre><code>pip install pickledb</code></pre>
+        <p class="license-note" style="margin-top: 16px; position: relative; z-index: 1;">
+          Need the SQLite backend? Install the extra:
+          <code>pip install "pickledb[sqlite]"</code>
+        </p>
+      </div>
+    </section>
+
+    <section class="section fade-in">
+      <h2>Quick Start</h2>
+
+      <div class="context-showcase">
+        <div class="context-card">
+          <h4>Synchronous Example</h4>
+          <pre><code><span class="keyword">from</span> pickledb <span class="keyword">import</span> PickleDB
+
+<span class="comment"># Bind to a JSON file; no I/O yet</span>
+db = PickleDB(<span class="string">"data.json"</span>)
+db.load()
+
+db.set(<span class="string">"username"</span>, <span class="string">"alice"</span>)
+db.set(<span class="string">"theme"</span>, {
+    <span class="string">"color"</span>: <span class="string">"blue"</span>,
+    <span class="string">"font"</span>: <span class="string">"sans-serif"</span>
+})
+
+<span class="function">print</span>(db.get(<span class="string">"username"</span>))  <span class="comment"># → "alice"</span>
+
+db.save()  <span class="comment"># atomically write to disk</span></code></pre>
+        </div>
+
+        <div class="context-card">
+          <h4>Asynchronous Example</h4>
+          <pre><code><span class="keyword">import</span> asyncio
+<span class="keyword">from</span> pickledb <span class="keyword">import</span> PickleDB
+
+<span class="keyword">async def</span> <span class="function">main</span>():
+    db = PickleDB(<span class="string">"data.json"</span>)
+    <span class="keyword">await</span> db.load()
+
+    <span class="keyword">await</span> db.set(<span class="string">"score"</span>, <span class="number">42</span>)
+    value = <span class="keyword">await</span> db.get(<span class="string">"score"</span>)
+    <span class="function">print</span>(value)  <span class="comment"># → 42</span>
+
+    <span class="keyword">await</span> db.save()
+
+asyncio.run(main())</code></pre>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Explicit I/O:</strong> The constructor <code>PickleDB("data.json")</code> never touches disk. <code>load()</code> and <code>save()</code> are explicit (or handled by context managers).</p>
+      </div>
+    </section>
+
+    <section class="section fade-in">
+      <h2>Design Philosophy</h2>
+
+      <div class="card">
+        <ul>
+          <li><strong>In-memory first:</strong> All data lives in memory while you work; JSON is used only for persistence</li>
+          <li><strong>Method-only API:</strong> No dict syntax. Use <code>set()</code>, <code>get()</code>, <code>remove()</code>, etc.</li>
+          <li><strong>Unified sync/async:</strong> Every core method works in both worlds via the same name</li>
+          <li><strong>Atomic disk writes:</strong> Uses a temp file and <code>os.replace</code> to avoid partial writes</li>
+          <li><strong>No hidden autosave:</strong> Nothing is written to disk unless you call <code>save()</code> or exit a context manager cleanly</li>
+        </ul>
+      </div>
+
+      <div class="callout-danger callout">
+        <p><strong>⚠️ Thread & Process Safety:</strong> <code>PickleDB</code> (the default JSON-backed class) is <strong>not thread-safe or process-safe</strong>. Multiple threads or processes writing to the same JSON file <strong>will cause data corruption</strong>.</p>
+        <p><strong>When you need concurrency on a single machine:</strong> Use <code>PickleDBSQLite</code> instead. SQLite provides file-level locking and ACID transactions, making it safe for concurrent access across threads and processes on the same host.</p>
+        <p><strong>⚡ Performance trade-off:</strong> <code>PickleDBSQLite</code> is <strong>significantly slower</strong> than <code>PickleDB</code> because it reads/writes to disk on every operation instead of keeping everything in memory. Use it <em>only when you need the safety guarantees</em>.</p>
+        <p><strong>For networked or multi-host workloads:</strong> Neither class is suitable. Consider Redis, PostgreSQL, MongoDB, or <a href="https://github.com/patx/mongokv">mongoKV</a>.</p>
+      </div>
+    </section>
+
+    <section class="section fade-in">
+      <h2>Choosing the Right Backend</h2>
+      
+      <p>pickleDB offers two storage backends, each optimized for different use cases:</p>
+
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>PickleDB (orJSON)</th>
+            <th>PickleDBSQLite</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Storage Model</strong></td>
+            <td>In-memory with JSON persistence</td>
+            <td>Disk-based SQLite with orjson encoding</td>
+          </tr>
+          <tr>
+            <td><strong>Performance</strong></td>
+            <td>Very fast (all operations in RAM)</td>
+            <td>Slower (disk I/O on every operation)</td>
+          </tr>
+          <tr>
+            <td><strong>Thread Safety</strong></td>
+            <td>❌ Not safe</td>
+            <td>✅ Safe (SQLite locking)</td>
+          </tr>
+          <tr>
+            <td><strong>Process Safety</strong></td>
+            <td>❌ Not safe (data corruption risk)</td>
+            <td>✅ Safe (file-level locking)</td>
+          </tr>
+          <tr>
+            <td><strong>ACID Transactions</strong></td>
+            <td>❌ No</td>
+            <td>✅ Yes</td>
+          </tr>
+          <tr>
+            <td><strong>Memory Usage</strong></td>
+            <td>High (entire DB in RAM)</td>
+            <td>Low (only active queries in RAM)</td>
+          </tr>
+          <tr>
+            <td><strong>Best For</strong></td>
+            <td>Single-threaded apps, scripts, fast prototypes</td>
+            <td>Multi-threaded/process apps and scripts</td>
+          </tr>
+          <tr>
+            <td><strong>Dependencies</strong></td>
+            <td><code>orjson</code> and <code>aiofiles</code></td>
+            <td><code>orjson</code>, <code>aiofiles</code> plus <code>aiosqlite</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout-warning callout">
+        <p><strong>Rule of thumb:</strong> Use <code>PickleDB</code> (JSON) by default for maximum performance. Only switch to <code>PickleDBSQLite</code> when you need thread/process safety or ACID guarantees, and can accept the performance penalty.</p>
+      </div>
+    </section>
+
+    <section class="section fade-in">
+      <h2>Context Managers</h2>
+      <p>Automatically load and save your database with context managers:</p>
+
+      <div class="context-showcase">
+        <div class="context-card">
+          <h4>Synchronous Context</h4>
+          <pre><code><span class="keyword">from</span> pickledb <span class="keyword">import</span> PickleDB
+
+<span class="keyword">with</span> PickleDB(<span class="string">"data.json"</span>) <span class="keyword">as</span> db:
+    <span class="comment"># On enter: db.load()</span>
+    db.set(<span class="string">"foo"</span>, <span class="string">"bar"</span>)
+    db.set(<span class="string">"hello"</span>, <span class="string">"world"</span>)
+    <span class="comment"># On exit: db.save()</span></code></pre>
+        </div>
+
+        <div class="context-card">
+          <h4>Asynchronous Context</h4>
+          <pre><code><span class="keyword">import</span> asyncio
+<span class="keyword">from</span> pickledb <span class="keyword">import</span> PickleDB
+
+<span class="keyword">async def</span> <span class="function">main</span>():
+    <span class="keyword">async with</span> PickleDB(<span class="string">"data.json"</span>) <span class="keyword">as</span> db:
+        <span class="comment"># On enter: await db.load()</span>
+        <span class="keyword">await</span> db.set(<span class="string">"foo"</span>, <span class="string">"bar"</span>)
+        <span class="keyword">await</span> db.set(<span class="string">"hello"</span>, <span class="string">"world"</span>)
+        <span class="comment"># On exit: await db.save()</span>
+
+asyncio.run(main())</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section fade-in">
+      <h2>API Reference</h2>
+      <p>pickleDB exposes two primary classes: <code>PickleDB</code> for JSON-on-disk, and <code>PickleDBSQLite</code> for an optional SQLite backend. All core methods share the same names in synchronous and asynchronous code — just add <code>await</code> when you're inside an <code>async</code> function.</p>
+
+      <div class="api-section">
+        <div class="api-class">
+          <div class="api-class-header">
+            <div class="api-class-name">class PickleDB(location: str)</div>
+            <div class="api-class-note">In-memory JSON database backed by a single file on disk.</div>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>load() -&gt; self</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Load (or reload) the JSON file at <code>location</code> into memory. If the file is missing or empty, the in-memory database becomes an empty dict.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>db.load()</code></li>
+              <li><strong>Async:</strong> <code>await db.load()</code></li>
+              <li>Returns the database instance itself, allowing method chaining.</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>save() -&gt; bool</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Atomically write the in-memory database to disk at <code>location</code> using a temporary file + <code>os.replace()</code>.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>db.save()</code></li>
+              <li><strong>Async:</strong> <code>await db.save()</code></li>
+              <li>Returns <code>True</code> on success.</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>set(key: Any, value: Any) -&gt; bool</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Store <code>value</code> under <code>key</code> in the in-memory database. Keys are coerced to <code>str</code>, and values must be JSON-serializable (via <code>orjson</code>).
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>db.set("name", "alice")</code></li>
+              <li><strong>Async:</strong> <code>await db.set("name", "alice")</code></li>
+              <li>Returns <code>True</code> after updating the in-memory store (does not write to disk until <code>save()</code>).</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>get(key: Any, default: Any | None = None) -&gt; Any | None</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Retrieve the value stored under <code>key</code>, or <code>default</code> if it doesn't exist.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>db.get("name")</code> or <code>db.get("name", default="guest")</code></li>
+              <li><strong>Async:</strong> <code>await db.get("name")</code></li>
+              <li>Returns the stored value, or <code>default</code> (default is <code>None</code>).</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>remove(key: Any) -&gt; bool</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Remove <code>key</code> from the in-memory database.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>db.remove("name")</code></li>
+              <li><strong>Async:</strong> <code>await db.remove("name")</code></li>
+              <li>Returns <code>True</code> if the key existed and was removed, <code>False</code> otherwise.</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>all() -&gt; list[str]</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Return a list of all keys currently stored in memory.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>db.all()</code></li>
+              <li><strong>Async:</strong> <code>await db.all()</code></li>
+              <li>Returns a list of <code>str</code> keys. Order is not guaranteed.</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>purge() -&gt; bool</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Clear the in-memory database (equivalent to <code>db.all()</code> becoming an empty list). Does not touch disk until you call <code>save()</code>.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>db.purge()</code></li>
+              <li><strong>Async:</strong> <code>await db.purge()</code></li>
+              <li>Returns <code>True</code>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="api-class">
+          <div class="api-class-header">
+            <div class="api-class-name">
+              class PickleDBSQLite(sqlite_path: str = "pickledb.sqlite3", table_name: str = "kv")
+            </div>
+            <div class="api-class-note">
+              Optional SQLite-backed key-value store using the same sync/async method names.
+            </div>
+          </div>
+
+          <p class="api-class-note" style="margin-top: 4px;">
+            <strong>Installation:</strong>
+            <code>PickleDBSQLite</code> lives behind an optional dependency. Install
+            <code>aiosqlite</code> yourself or use:
+            <code>pip install "pickledb[sqlite]"</code>.
+          </p>
+          <p class="api-class-note" style="margin-top: 4px;">
+            <strong>Why use it?</strong> SQLite adds file-level locking and ACID transactions, so concurrent readers and
+            serialized writers across multiple threads/processes on the <em>same machine</em> are handled for you. It's still
+            not a distributed database, but it's much safer than multiple processes writing to a plain JSON file.
+          </p>
+          <p class="api-class-note" style="margin-top: 4px; color: var(--accent-danger); font-weight: 600;">
+            <strong>⚠️ Performance warning:</strong> Unlike <code>PickleDB</code>, this class does <strong>NOT</strong> store data in memory. Every read and write hits the disk, making it significantly slower. Only use <code>PickleDBSQLite</code> when thread/process safety is essential.
+          </p>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>set(key: str | None, value: Any) -&gt; str</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Store <code>value</code> in a SQLite table as an orjson-encoded BLOB. If <code>key</code> is
+              <code>None</code>, a new UUID key is generated and returned.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>key = kv.set(None, {"foo": "bar"})</code></li>
+              <li><strong>Async:</strong> <code>key = await kv.set(None, {"foo": "bar"})</code></li>
+              <li>Returns the key used (either the provided string or the generated UUID).</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>get(key: str, default: Any = MISSING) -&gt; Any</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Look up a key in SQLite and deserialize it from orjson. If the key does not exist and no <code>default</code> is
+              provided, a <code>KeyError</code> is raised.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>kv.get(key)</code> or <code>kv.get("missing", default=None)</code></li>
+              <li><strong>Async:</strong> <code>await kv.get(key)</code></li>
+              <li>Returns the stored value, <code>default</code>, or raises <code>KeyError</code>.</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>remove(key: str) -&gt; bool</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Delete <code>key</code> from the SQLite table.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>kv.remove("key")</code></li>
+              <li><strong>Async:</strong> <code>await kv.remove("key")</code></li>
+              <li>Returns <code>True</code> if a row was deleted, <code>False</code> otherwise.</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>all() -&gt; list[str]</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Return a list of all keys stored in the SQLite table.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>kv.all()</code></li>
+              <li><strong>Async:</strong> <code>await kv.all()</code></li>
+              <li>Returns a list of key strings sorted by key.</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>purge() -&gt; bool</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Remove all rows from the SQLite table.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>kv.purge()</code></li>
+              <li><strong>Async:</strong> <code>await kv.purge()</code></li>
+              <li>Returns <code>True</code>.</li>
+            </ul>
+          </div>
+
+          <div class="api-method">
+            <div class="api-signature">
+              <code>close() -&gt; None</code>
+              <div class="api-tags">
+                <span class="api-tag">sync</span>
+                <span class="api-tag">async</span>
+              </div>
+            </div>
+            <p class="api-desc">
+              Close the underlying synchronous SQLite connection. In async code, returns a coroutine you should <code>await</code>.
+            </p>
+            <ul class="api-usage">
+              <li><strong>Sync:</strong> <code>kv.close()</code></li>
+              <li><strong>Async:</strong> <code>await kv.close()</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout-warning callout">
+        <p><strong>Important:</strong> pickleDB is intentionally <strong>method-based only</strong>. Dict-style access like <code>db["key"]</code> or <code>db["key"] = value</code> is not supported.</p>
+      </div>
+    </section>
+
+    <section class="section fade-in">
+      <h2>Common Patterns</h2>
+
+      <h3>Storing Complex Data</h3>
+      <pre><code><span class="comment"># Store a dictionary</span>
+db.set(<span class="string">"user"</span>, {<span class="string">"name"</span>: <span class="string">"Alice"</span>, <span class="string">"age"</span>: <span class="number">30</span>})
+
+<span class="comment"># Update it</span>
+user = db.get(<span class="string">"user"</span>)
+user[<span class="string">"age"</span>] += <span class="number">1</span>
+db.set(<span class="string">"user"</span>, user)
+
+<span class="function">print</span>(db.get(<span class="string">"user"</span>))
+<span class="comment"># {'name': 'Alice', 'age': 31}</span></code></pre>
+
+      <h3>Lists / Simple Queues</h3>
+      <pre><code>db.set(<span class="string">"tasks"</span>, [<span class="string">"write"</span>, <span class="string">"test"</span>, <span class="string">"deploy"</span>])
+
+tasks = db.get(<span class="string">"tasks"</span>, [])
+tasks.append(<span class="string">"celebrate"</span>)
+db.set(<span class="string">"tasks"</span>, tasks)
+
+<span class="function">print</span>(db.get(<span class="string">"tasks"</span>))
+<span class="comment"># ['write', 'test', 'deploy', 'celebrate']</span></code></pre>
+
+      <h3>Namespace Keys</h3>
+      <pre><code>db.set(<span class="string">"user:1"</span>, {<span class="string">"name"</span>: <span class="string">"Alice"</span>})
+db.set(<span class="string">"user:2"</span>, {<span class="string">"name"</span>: <span class="string">"Bob"</span>})
+
+<span class="keyword">def</span> <span class="function">keys_with_prefix</span>(db, prefix):
+    <span class="keyword">return</span> [k <span class="keyword">for</span> k <span class="keyword">in</span> db.all() <span class="keyword">if</span> k.startswith(prefix)]
+
+<span class="function">print</span>(keys_with_prefix(db, <span class="string">"user:"</span>))
+<span class="comment"># ['user:1', 'user:2']</span></code></pre>
+
+      <h3>Basic TTL Pattern</h3>
+      <pre><code><span class="keyword">import</span> time
+
+<span class="keyword">def</span> <span class="function">set_with_ttl</span>(db, key, value, ttl_seconds):
+    db.set(key, {
+        <span class="string">"value"</span>: value,
+        <span class="string">"expires_at"</span>: time.time() + ttl_seconds,
+    })
+
+<span class="keyword">def</span> <span class="function">get_if_fresh</span>(db, key):
+    data = db.get(key)
+    <span class="keyword">if not</span> data:
+        <span class="keyword">return</span> <span class="keyword">None</span>
+    <span class="keyword">if</span> time.time() &lt; data.get(<span class="string">"expires_at"</span>, <span class="number">0</span>):
+        <span class="keyword">return</span> data[<span class="string">"value"</span>]
+    db.remove(key)
+    <span class="keyword">return</span> <span class="keyword">None</span>
+
+set_with_ttl(db, <span class="string">"session"</span>, <span class="string">"active"</span>, ttl_seconds=<span class="number">5</span>)
+time.sleep(<span class="number">3</span>)
+<span class="function">print</span>(get_if_fresh(db, <span class="string">"session"</span>))  <span class="comment"># 'active'</span>
+time.sleep(<span class="number">3</span>)
+<span class="function">print</span>(get_if_fresh(db, <span class="string">"session"</span>))  <span class="comment"># None</span></code></pre>
+    </section>
+
+    <section class="section fade-in">
+      <h2>Performance Snapshot</h2>
+      <p>Example timings loading, reading, and saving large JSON payloads using <code>PickleDB</code> (JSON) in async mode on a Dell XPS 9350, Ubuntu 24.04:</p>
+
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>Entries</th>
+            <th>Load (into memory)</th>
+            <th>Bulk Read</th>
+            <th>Save (to disk)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1M</strong></td>
+            <td>0.68 s</td>
+            <td>0.64 s</td>
+            <td>0.03 s</td>
+          </tr>
+          <tr>
+            <td><strong>10M</strong></td>
+            <td>7.48 s</td>
+            <td>7.27 s</td>
+            <td>0.22 s</td>
+          </tr>
+          <tr>
+            <td><strong>50M</strong></td>
+            <td>43.36 s</td>
+            <td>36.53 s</td>
+            <td>1.09 s</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout-success callout">
+        <p><strong>Benchmark Details:</strong> Full benchmark script available at <a href="https://gist.github.com/patx/025ed3a10482459f35c738228ebd0721">this GitHub Gist</a>.</p>
+      </div>
+
+      <div class="callout-danger callout">
+        <p><strong>PickleDBSQLite Performance:</strong> The SQLite backend is <strong>orders of magnitude slower</strong> than these numbers because it performs disk I/O on every operation. Use it only when you need thread/process safety.</p>
+      </div>
+    </section>
+
+    <section class="section fade-in">
+      <div class="warning-list">
+        <h3>When Not to Use pickleDB</h3>
+        <ul>
+          <li><strong>PickleDB (JSON):</strong> Multi-threaded or multi-process applications (use <code>PickleDBSQLite</code> instead)</li>
+          <li><strong>Both classes:</strong> ASGI web servers with multiple workers</li>
+          <li><strong>Both classes:</strong> Your dataset is too large to comfortably fit in memory (JSON) or requires high-performance disk access (SQLite)</li>
+          <li><strong>Both classes:</strong> You need distributed/multi-host concurrency</li>
+          <li><strong>Both classes:</strong> You need rich querying, indexing, or joins</li>
+        </ul>
+        <p style="color: var(--text-secondary); margin-top: 24px;">
+          In those cases, consider Redis, PostgreSQL, MongoDB, or <a href="https://github.com/patx/mongokv">mongoKV</a>.
+        </p>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      <p>Issues, questions, or ideas? Open an issue on <a href="https://github.com/patx/pickledb/issues">GitHub</a>.</p>
+      <p style="margin-top: 16px;">Made with 🍺 by <a href="https://harrisonerd.com/">Harrison Erd</a></p>
+    </div>
+  </div>
+
+</body>
+</html>
