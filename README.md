@@ -15,13 +15,13 @@ db.set("key", "value")
 db.get("key")  # return "value"
 ```
 
-Tính năng 1: 
-  -Mở 3 tab terminal (đã vào folders lưu file code "cd ...")
-  -terminal 1 : source .venv/bin/activate (kích hoạt môi trường ảo .venv)
+# Tính năng 1: Mô hình Replication (Master - Slave) có khả năng Chịu lỗi (Fault-Tolerance)
+  ## -Mở 3 tab terminal (đã vào folders lưu file code "cd ...")
+  ### -terminal 1 : source .venv/bin/activate (kích hoạt môi trường ảo .venv)
                 python server.py --role slave --port 5002 (lệnh khởi động Node Slave)
-  -terminal 2 : source .venv/bin/activate
+  ### -terminal 2 : source .venv/bin/activate
                 python server.py --role master --port 5001 --slaves 5002 (bật Node Master ở Port 5001, đồng thời khai báo cho nó biết có một Slave ở Port 5002)
-  -terminal 3(Terminal này đóng vai trò là Client để gõ lệnh gửi dữ liệu, thực hiện các demo test)
+  ### -terminal 3(Terminal này đóng vai trò là Client để gõ lệnh gửi dữ liệu, thực hiện các demo test)
     + Kịch bản 1: Ghi dữ liệu vào Master và kiểm tra tự động đồng bộ (Replication) 
         Gửi lệnh SET một key bất kỳ (ví dụ: mssv giá trị B123456) tới Master (5001): curl -X POST http://127.0.0.1:5001/set -H "Content-Type: application/json" -d "{\"key\": \"mssv\", \"value\": \"23010468\"}"
         Quan sát terminal 2 (Master): Bạn sẽ thấy dòng log in ra: [Master] Synced key 'mssv' to slave at http://127.0.0.1:5002
