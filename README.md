@@ -16,7 +16,7 @@ db.get("key")  # return "value"
 ```
 
 # Tính năng 1: Mô hình Replication (Master - Slave) có khả năng Chịu lỗi (Fault-Tolerance)
-  ## -Mở 3 tab terminal (đã vào folders lưu file code "cd ...")
+   ** -Mở 3 tab terminal (đã vào folders lưu file code "cd ...") **
   ### -terminal 1 : source .venv/bin/activate (kích hoạt môi trường ảo .venv)
                 python server.py --role slave --port 5002 (lệnh khởi động Node Slave)
   ### -terminal 2 : source .venv/bin/activate
@@ -36,3 +36,25 @@ db.get("key")  # return "value"
         Quay lại Terminal 2 (Master) và nhấn Ctrl + C để TẮT HẲN NODE MASTER. (Lúc này cụm Master đã sập)
         Quay lại Terminal 3 (Client), tiếp tục gọi lệnh ĐỌC từ Slave xem dữ liệu có bị mất hay hệ thống có bị tê liệt không: curl -X GET "http://127.0.0.1:5002/get?key=mssv"
         Kết quả mong đợi: Slave vẫn trả về kết quả 23010468 bình thường. Hệ thống vẫn hoạt động (ở chế độ đọc) bất chấp Node chính bị sập
+
+# Tính năng 2: Phân mảnh dữ liệu (Sharding) dựa trên Hashing qua một Router trung gian
+  ** -Mở 4 tab terminal (đã vào folders lưu file code "cd ...") **
+  ### -terminal 1 : Bật Shard 1 ở Port 6001
+                source .venv/bin/activate (kích hoạt môi trường ảo .venv) 
+                python server.py --role master --port 6001
+  ### -terminal 2 : Bật Shard 2 ở Port 6002
+                source .venv/bin/activate (kích hoạt môi trường ảo .venv) 
+                python server.py --role master --port 6002
+  ### -terminal 3 : Bật Router ở Port 6000
+                source .venv/bin/activate (kích hoạt môi trường ảo .venv) 
+                python router.py
+  ### -terminal 4 : Đóng vai Client để test phân mảnh
+  Bây giờ, mọi thao tác Đọc/Ghi chỉ gửi duy nhất tới Router (Port 6000) qua endpoint /router/set và /router/get
+    + Ghi Key thứ nhất (apple): curl -X POST http://127.0.0.1:6000/router/set -H "Content-Type: application/json" -d "{\"key\": \"apple\", \"value\": \"100\"}"
+        Nhìn vào log Terminal 3 (Router): Xem nó in ra apple thuộc về Shard nào (Ví dụ: Shard 0 - Port 6001).
+    + Ghi Key thứ hai (banana): curl -X POST http://127.0.0.1:6000/router/set -H "Content-Type: application/json" -d "{\"key\": \"banana\", \"value\": \"101\"}"
+        Nhìn vào log Terminal 3 (Router): Xem nó điều hướng sang Shard còn lại (Ví dụ: Shard 1 - Port 6002).
+    + ĐỌC THỬ DỮ LIỆU QUA ROUTER: 
+        curl -X GET "http://127.0.0.1:6000/router/get?key=apple"
+        curl -X GET "http://127.0.0.1:6000/router/get?key=banana"
+      Router vẫn tự động biết đường tìm đến đúng nơi để trả về chính xác giá trị 100 và 101
