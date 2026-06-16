@@ -23,12 +23,12 @@ db.get("key")  # return "value"
                 python server.py --role master --port 5001 --slaves 5002 (bật Node Master ở Port 5001, đồng thời khai báo cho nó biết có một Slave ở Port 5002)
   ### -terminal 3(Terminal này đóng vai trò là Client để gõ lệnh gửi dữ liệu, thực hiện các demo test)
     + Kịch bản 1: Ghi dữ liệu vào Master và kiểm tra tự động đồng bộ (Replication) 
-        Gửi lệnh SET một key bất kỳ (ví dụ: mssv giá trị B123456) tới Master (5001): curl -X POST http://127.0.0.1:5001/set -H "Content-Type: application/json" -d "{\"key\": \"mssv\", \"value\": \"23010468\"}"
-        Quan sát terminal 2 (Master): Bạn sẽ thấy dòng log in ra: [Master] Synced key 'mssv' to slave at http://127.0.0.1:5002
-        Quan sát thư mục dự án: Bạn sẽ thấy xuất hiện 2 file mới tự động sinh ra là pickledb_master_5001.db và pickledb_slave_5002.db.
+        Gửi lệnh SET một key bất kỳ (ví dụ: mssv giá trị 23010468) tới Master (5001): curl -X POST http://127.0.0.1:5001/set -H "Content-Type: application/json" -d "{\"key\": \"mssv\", \"value\": \"23010468\"}"
+        Quan sát terminal 2 (Master): Sẽ thấy dòng log in ra: [Master] Synced key 'mssv' to slave at http://127.0.0.1:5002
+        Quan sát thư mục dự án: Sẽ thấy xuất hiện 2 file mới tự động sinh ra là pickledb_master_5001.db và pickledb_slave_5002.db.
     + Kịch bản 2: Đọc dữ liệu từ Slave để chứng minh dữ liệu đã được nhân bản
         Thực hiện lệnh GET key mssv nhưng gửi tới Slave (5002): curl -X GET "http://127.0.0.1:5002/get?key=mssv"
-        Kết quả mong đợi: Trả về JSON: {"key": "mssv", "status": "success", "value": "23010468"}. Dù bạn chưa từng gọi lệnh ghi trực tiếp vào Slave nhưng Slave vẫn có dữ liệu
+        Kết quả mong đợi: Trả về JSON: {"key": "mssv", "status": "success", "value": "23010468"}. Dù chưa từng gọi lệnh ghi trực tiếp vào Slave nhưng Slave vẫn có dữ liệu
     + Kịch bản 3: Kiểm tra luật Read-Only của Slave
         Cố tình gửi lệnh SET trực tiếp vào Slave (5002) xem Slave có chặn lại không: curl -X POST http://127.0.0.1:5002/set -H "Content-Type: application/json" -d "{\"key\": \"hack_db\", \"value\": \"999\"}"
         Kết quả mong đợi: Trả về lỗi 403 Forbidden với message: "Write operation denied. This is a Read-Only Slave Node!". Đúng tính chất của kiến trúc Master-Slave
@@ -49,7 +49,7 @@ db.get("key")  # return "value"
                 source .venv/bin/activate (kích hoạt môi trường ảo .venv) 
                 python router.py
   ### -terminal 4 : Đóng vai Client để test phân mảnh
-  Bây giờ, mọi thao tác Đọc/Ghi chỉ gửi duy nhất tới Router (Port 6000) qua endpoint /router/set và /router/get
+    Bây giờ, mọi thao tác Đọc/Ghi chỉ gửi duy nhất tới Router (Port 6000) qua endpoint /router/set và /router/get
     + Ghi Key thứ nhất (apple): curl -X POST http://127.0.0.1:6000/router/set -H "Content-Type: application/json" -d "{\"key\": \"apple\", \"value\": \"100\"}"
         Nhìn vào log Terminal 3 (Router): Xem nó in ra apple thuộc về Shard nào (Ví dụ: Shard 0 - Port 6001).
     + Ghi Key thứ hai (banana): curl -X POST http://127.0.0.1:6000/router/set -H "Content-Type: application/json" -d "{\"key\": \"banana\", \"value\": \"101\"}"
@@ -57,4 +57,4 @@ db.get("key")  # return "value"
     + ĐỌC THỬ DỮ LIỆU QUA ROUTER: 
         curl -X GET "http://127.0.0.1:6000/router/get?key=apple"
         curl -X GET "http://127.0.0.1:6000/router/get?key=banana"
-      Router vẫn tự động biết đường tìm đến đúng nơi để trả về chính xác giá trị 100 và 101
+        => Router vẫn tự động biết đường tìm đến đúng nơi để trả về chính xác giá trị 100 và 101
