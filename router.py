@@ -12,7 +12,7 @@ SHARDS = {
 def get_shard_url(key):
     """
     Thuật toán phân tán: Băm key để xác định Shard tương ứng.
-    Sử dụng hàm hash() có sẵn của Python và ép kiểu dương để tránh số âm.
+    Sử dụng hàm hash() có sẵn của Python và ép kiểu dương để tránh số âm
     """
     shard_index = abs(hash(key)) % len(SHARDS)
     return SHARDS[shard_index], shard_index
@@ -34,7 +34,7 @@ def route_set():
 
     try:
         # Chuyển tiếp (Forward) request nguyên vẹn sang Shard đó
-        # Vì các Shard chạy độc lập nên ta gửi như một lệnh POST thông thường
+        # Vì các Shard chạy độc lập nên gửi như một lệnh POST thông thường
         response = requests.post(f"{target_url}/set", json={"key": key, "value": value})
         return (response.content, response.status_code, response.headers.items())
     except requests.exceptions.RequestException:
