@@ -21,11 +21,11 @@ def get_value():
     if not key:
         return jsonify({"status": "error", "message": "Missing key"}), 400
     
-    # pickleDB mới: db.get() trả về giá trị mặc định (None) nếu không tìm thấy key
+    #db.get() trả về giá trị mặc định (None) nếu không tìm thấy key
     value = db.get(key)
     
     # Kiểm tra xem key có thực sự tồn tại trong bộ nhớ không (vì value có thể là None hợp lệ)
-    # Bản mới lưu dữ liệu trong dictionary `db.db`
+    # Lưu dữ liệu trong dictionary `db.db`
     if key not in db.db:
         return jsonify({"status": "error", "message": f"Key '{key}' not found"}), 404
         
@@ -54,7 +54,7 @@ def set_value():
 
     # Thực hiện ghi vào pickleDB cục bộ của Node hiện tại
     db.set(key, value)
-    db.save() # Bản mới dùng hàm .save() thay vì .dump() để ghi xuống file cứng
+    db.save() # Dùng hàm .save() để ghi xuống file cứng
 
     # NẾU LÀ MASTER: Tiến hành đồng bộ (Replicate) sang cho các Slave
     if ROLE == "master":
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         ports = args.slaves.split(',')
         SLAVE_URLS = [f"http://127.0.0.1:{p}" for p in ports]
 
-    # KHẮC PHỤC LỖI KHỞI TẠO CỦA BẢN MỚI:
+    # KHẮC PHỤC LỖI KHỞI TẠO :
     db_filename = f"pickledb_{ROLE}_{PORT}.db"
     
     # 1. Khởi tạo Object từ Class PickleDB
